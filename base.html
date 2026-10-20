@@ -1,0 +1,1100 @@
+<title>Nombre de la lección</title>
+<!--
+  Lesson template (base.html). Read plantilla/GUIA.md first.
+
+  1. Copy this file to lecciones/NN-slug/index.html.
+  2. Replace the title above (2 to 4 words, no subtitle) and every SLOT comment.
+  3. Leave the style block and the tutor-core block alone: they are shared by all lessons.
+     If a lesson needs new shared CSS, report it in your return notes so it can be backported here.
+  4. Fill LESSON and EXAM in the lesson script, then replace the sample demo and practice.
+  5. QA: extract each inline script and syntax-check it with node (the exact command is in GUIA.md).
+
+  This file is an artifact fragment on purpose: no doctype, html, head or body tags.
+  The local server (serve.py) and the artifact platform both wrap it.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Gloock&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; each section pairs a short explanation with a playable keyboard, closing on the Camelot ring.
+   Tokens come first (light, dark by system preference, dark forced by data-theme); every colour in the page is a token. */
+:root {
+  --bg: #f2f3f7;
+  --surface: #ffffff;
+  --ink: #191c26;
+  --muted: #5b6172;
+  --line: #d8dbe4;
+  --felt: #a3262f;
+  --felt-soft: #f7e4e5;
+  --on-felt: #ffffff;
+  --warn: #8f5410;
+  --case: #24211f;
+  --felt-strip: #8e1f27;
+  --ivory: #fbfaf5;
+  --ivory-edge: #cfcabd;
+  --ebony: #1b1a1f;
+  --key-ink: #2a2a2e;
+  --on-ebony: #f2f0ea;
+  --key-lit: #f2c4c8;
+  --key-start: #e3929a;
+  --ebony-lit: #b3303a;
+  --slot-off: #e3e5ec;
+  --wheel-ink: #16181f;
+  --ok: #1f7a4d;
+  --ok-soft: #e1f2e8;
+  --warn-soft: #f8ebd6;
+  --w1: #6fe3b8; --w2: #8bea7c; --w3: #bde46b; --w4: #e9d35c; --w5: #f3aa62; --w6: #f48c80;
+  --w7: #ee7ea2; --w8: #df7cc2; --w9: #b98ce6; --w10: #9a9ef0; --w11: #80b9f2; --w12: #5fdde3;
+  --font-display: "Gloock", Georgia, "Times New Roman", serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12141a; --surface: #1b1e27; --ink: #e8eaf0; --muted: #9ba1b1; --line: #2d313d;
+    --felt: #e8707a; --felt-soft: #3a2026; --on-felt: #1a0d10; --warn: #e3a64a;
+    --case: #0d0c0f; --felt-strip: #8e1f27; --ivory: #ebe8de; --ivory-edge: #b9b4a6; --ebony: #08080a;
+    --key-ink: #2a2a2e; --on-ebony: #f2f0ea; --key-lit: #eeb3b9; --key-start: #e0838c; --ebony-lit: #c23a45;
+    --slot-off: #272b36; --wheel-ink: #16181f;
+    --ok: #5fd39a; --ok-soft: #17332a; --warn-soft: #3a2d16;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12141a; --surface: #1b1e27; --ink: #e8eaf0; --muted: #9ba1b1; --line: #2d313d;
+  --felt: #e8707a; --felt-soft: #3a2026; --on-felt: #1a0d10; --warn: #e3a64a;
+  --case: #0d0c0f; --felt-strip: #8e1f27; --ivory: #ebe8de; --ivory-edge: #b9b4a6; --ebony: #08080a;
+  --key-ink: #2a2a2e; --on-ebony: #f2f0ea; --key-lit: #eeb3b9; --key-start: #e0838c; --ebony-lit: #c23a45;
+  --slot-off: #272b36; --wheel-ink: #16181f;
+  --ok: #5fd39a; --ok-soft: #17332a; --warn-soft: #3a2d16;
+  color-scheme: dark;
+}
+
+/* Base: one grid column with a 20px gutter, so nothing needs horizontal scroll at 400px. */
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.55; }
+.page { max-width: 860px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 48px; }
+p { margin: 0; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(2.1rem, 6vw, 3.4rem); }
+h1 .code { display: block; font-family: var(--font-mono); font-size: 0.55em; color: var(--felt); letter-spacing: 0.06em; margin-top: 12px; }
+h2 { font-size: clamp(1.5rem, 3.6vw, 2rem); }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+.lead { font-size: 1.15rem; max-width: 62ch; margin-top: 18px; }
+
+/* Author display rules (.result, .exam-fb, ...) would otherwise beat the browser's [hidden], leaving hidden panels visible. */
+[hidden] { display: none !important; }
+
+/* Terms: 2 or 3 short definitions under the lead; auto-fit keeps them in one row when there is room. */
+.terms { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 24px; margin: 28px 0 0; }
+.terms div { border-top: 2px solid var(--ink); padding-top: 10px; min-width: 0; }
+.terms dt { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--felt); }
+.terms dd { margin: 6px 0 0; }
+
+/* Block: a titled section split by a hairline. Demo, practice, wheel and exam all use it. */
+.block { display: grid; gap: 18px; border-top: 1px solid var(--line); padding-top: 32px; }
+.block-head { display: grid; gap: 8px; max-width: 64ch; }
+.block-head p { color: var(--muted); }
+
+/* Buttons: pills. .seg is a two-state selector that exposes its state through aria-pressed. */
+.controls, .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--felt); outline-offset: 2px; }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 8px 16px; font-size: 15px; }
+.btn:hover { border-color: var(--muted); }
+.btn-primary { background: var(--felt); border-color: var(--felt); color: var(--on-felt); }
+.btn-primary:hover { border-color: var(--felt); filter: brightness(1.06); }
+.seg { display: inline-flex; gap: 2px; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--surface); }
+.seg button { border: 0; background: transparent; color: var(--ink); border-radius: 999px; padding: 6px 14px; font-size: 15px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* Chips spell the scale code step by step: done = felt tint, current = thick outline. */
+.code-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { min-width: 46px; padding: 6px 8px 5px; border: 1px solid var(--line); border-radius: 8px; text-align: center; font-family: var(--font-mono); background: var(--surface); display: grid; gap: 1px; box-sizing: border-box; }
+.chip b { font-size: 18px; font-weight: 500; line-height: 1.1; }
+.chip small { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; }
+.chip.done { background: var(--felt-soft); border-color: var(--felt); }
+.chip.current { border: 2px solid var(--felt); padding: 5px 7px 4px; }
+
+/* Piano keyboard: wide, so it scrolls sideways inside .kb-wrap on narrow screens instead of widening the page.
+   Black keys hide their label until lit, which keeps unrelated notes quiet. */
+.kb-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.kb-inner { min-width: 440px; }
+.arcs { position: relative; height: 40px; margin: 0 8px; }
+.arc { position: absolute; bottom: 0; height: 20px; border: 2px solid var(--felt); border-bottom: 0; border-radius: 999px 999px 0 0; box-sizing: border-box; }
+.arc span { position: absolute; left: 50%; top: -20px; transform: translateX(-50%); font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--felt); }
+.case { background: var(--case); border-top: 6px solid var(--felt-strip); border-radius: 4px 4px 12px 12px; padding: 0 8px 10px; }
+.kb { position: relative; height: 150px; }
+.key { position: absolute; top: 0; border: 0; margin: 0; padding: 0 0 8px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; box-sizing: border-box; transition: background-color 0.15s; }
+.key.white { height: 100%; background: var(--ivory); color: var(--key-ink); border-right: 1px solid var(--ivory-edge); border-radius: 0 0 5px 5px; z-index: 1; }
+.key.black { height: 62%; background: var(--ebony); color: var(--on-ebony); border-radius: 0 0 4px 4px; z-index: 2; padding-bottom: 6px; }
+.key .k-lat { font-size: 11px; font-weight: 700; line-height: 1; }
+.key .k-us { font-family: var(--font-mono); font-size: 10px; line-height: 1; opacity: 0.75; }
+.key.black .k-lat { font-size: 9px; }
+.key.black .k-us { font-size: 8px; }
+.key.black:not(.is-lit) .k-lat, .key.black:not(.is-lit) .k-us { visibility: hidden; }
+.key.white.is-lit { background: var(--key-lit); }
+.key.white.is-start { background: var(--key-start); }
+.key.black.is-lit { background: var(--ebony-lit); }
+.key.black.is-start { box-shadow: inset 0 0 0 2px var(--on-ebony); }
+.key.is-wrong { box-shadow: inset 0 0 0 3px var(--warn); animation: nudge 0.35s; }
+.key.is-hint { animation: hint 1.2s ease-in-out; }
+@keyframes nudge { 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
+@keyframes hint { 0%, 100% { box-shadow: inset 0 0 0 0 var(--felt); } 50% { box-shadow: inset 0 0 0 5px var(--felt); } }
+
+/* Readout and starts: a text echo of what the keyboard shows, and the 12-start picker. */
+.readout { font-family: var(--font-mono); font-size: 15px; display: grid; gap: 2px; }
+.readout .us { color: var(--muted); }
+.caption { max-width: 64ch; }
+
+.starts { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.start { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 8px 4px; display: grid; gap: 2px; text-align: center; }
+.start .s-lat { font-size: 14px; font-weight: 700; }
+.start .s-us { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.start[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.start[aria-pressed="true"] .s-us { color: inherit; opacity: 0.75; }
+
+/* Status line: a live region for step-by-step feedback; the warning colour is reserved for a mistake. */
+.status { font-size: 1.05rem; min-height: 1.6em; }
+.status.is-warn { color: var(--warn); }
+
+/* Result card: what the student just built, revealed only after they finish. */
+.result { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 18px 20px; display: grid; gap: 12px; }
+.result-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.result h3 { font-size: 1.6rem; }
+.badge { font-family: var(--font-mono); font-weight: 500; font-size: 14px; padding: 4px 10px; border-radius: 999px; color: var(--wheel-ink); }
+.result dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 0; }
+.result dt { color: var(--muted); }
+.result dd { margin: 0; }
+.result .us { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
+.fine { color: var(--muted); font-size: 15px; }
+
+/* Exam (tutor-core): one fieldset per question. Graded state is a mark plus text, never colour alone. */
+.exam-root { display: grid; gap: 18px; }
+.exam { display: grid; gap: 16px; }
+.exam-q { margin: 0; min-width: 0; padding: 16px 18px 18px; border: 1px solid var(--line); border-left-width: 4px; border-radius: 12px; background: var(--surface); }
+/* A floated legend is the one way to make long legends wrap consistently across browsers. */
+.exam-q legend { float: left; width: 100%; padding: 0; margin: 0 0 12px; }
+.exam-q legend + .exam-opts { clear: both; }
+.exam-num { display: block; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.exam-text { display: block; font-size: 1.05rem; font-weight: 700; }
+.exam-opts { display: grid; gap: 8px; }
+.exam-opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); cursor: pointer; }
+.exam-opt:hover { border-color: var(--muted); }
+.exam-opt input { flex: none; width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--felt); }
+.exam-opt input:focus-visible { outline: 2px solid var(--felt); outline-offset: 2px; }
+.exam-opt:has(input:checked) { border-color: var(--felt); background: var(--felt-soft); }
+.exam-opt-text { min-width: 0; }
+.exam-q.is-ok { border-left-color: var(--ok); }
+.exam-q.is-bad { border-left-color: var(--warn); }
+.exam-q.is-ok .exam-opt, .exam-q.is-bad .exam-opt { cursor: default; }
+/* Three classes of specificity so the graded colours beat the :has(:checked) highlight above. */
+.exam-q .exam-opt.is-correct { border-color: var(--ok); background: var(--ok-soft); }
+.exam-q .exam-opt.is-correct .exam-opt-text::after { content: " ✓"; color: var(--ok); font-weight: 700; }
+.exam-q .exam-opt.is-wrong { border-color: var(--warn); background: var(--warn-soft); }
+.exam-q .exam-opt.is-wrong .exam-opt-text::after { content: " ✗"; color: var(--warn); font-weight: 700; }
+.exam-fb { display: grid; gap: 6px; margin-top: 12px; padding: 10px 12px; border-radius: 10px; }
+.exam-fb.is-ok { background: var(--ok-soft); }
+.exam-fb.is-ok strong { color: var(--ok); }
+.exam-fb.is-bad { background: var(--warn-soft); }
+.exam-fb.is-bad strong { color: var(--warn); }
+.exam-result:focus-visible { outline: 2px solid var(--felt); outline-offset: 2px; }
+.exam-hist { display: grid; gap: 8px; }
+.exam-hist h3 { font-size: 1.2rem; }
+.exam-hist ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.exam-hist li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--line); font-family: var(--font-mono); font-size: 14px; }
+.exam-mode { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.exam-copy { display: grid; gap: 8px; justify-items: start; }
+.exam-json { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font-family: var(--font-mono); font-size: 12px; }
+
+/* Wheel: SVG ring of slots; undiscovered slots stay neutral so lit ones read as progress. */
+.wheel-block { grid-template-columns: minmax(0, 1fr) minmax(0, 280px); align-items: center; gap: 24px 40px; }
+.wheel-text { display: grid; gap: 12px; max-width: 60ch; }
+.wheel-fig { margin: 0; display: grid; gap: 8px; justify-items: center; }
+#wheel { width: 100%; max-width: 280px; height: auto; }
+.seg-path { stroke: var(--bg); stroke-width: 2; }
+.seg-label { font-family: var(--font-mono); font-size: 13px; font-weight: 500; text-anchor: middle; dominant-baseline: central; }
+.wheel-center { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; text-anchor: middle; fill: var(--muted); }
+.wheel-center-big { font-family: var(--font-display); font-size: 20px; text-anchor: middle; fill: var(--ink); }
+.wheel-count { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+
+/* Footer: source citation. */
+.foot { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+
+/* Narrow screens: single-column wheel, fewer start buttons per row, shorter keys. */
+@media (max-width: 640px) {
+  .wheel-block { grid-template-columns: minmax(0, 1fr); }
+  .starts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .kb { height: 130px; }
+  .exam-q { padding: 14px; }
+}
+/* Reduced motion: no animation; the hint highlight stays as a static outline so it still works. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .key.is-hint { box-shadow: inset 0 0 0 5px var(--felt); }
+}
+</style>
+
+<main class="page">
+  <header>
+    <!-- SLOT header.
+         eyebrow: "Lección N · Módulo XX, Tema" (N without zero padding; XX as numbered in the notes).
+         h1: the lesson title. Put a short mono code in <span class="code"> only if the lesson has one.
+         lead: the whole idea in ONE sentence, simple, no jargon that has not been defined yet.
+         terms: 2 or 3 definitions; one of them is the everyday analogy (like "La idea clave"). -->
+    <p class="eyebrow">Lección N · Módulo XX, Tema</p>
+    <h1>Título de la lección</h1>
+    <p class="lead">La idea de la lección en una sola frase sencilla.</p>
+    <dl class="terms">
+      <div><dt>Término</dt><dd>Definición corta, con palabras de todos los días.</dd></div>
+      <div><dt>Otro término</dt><dd>Definición corta.</dd></div>
+      <div><dt>La idea clave</dt><dd>Una analogía cotidiana que la haga memorable.</dd></div>
+    </dl>
+  </header>
+
+  <!-- SLOT demo ("Mira ..."). An interactive that SHOWS the idea and is complete at rest.
+       Name the section after what the student sees (for example "Mira el código en acción").
+       Keep the keyboard container: #demo-kb. Remove the chips, caption or sound button if unused. -->
+  <section class="block" id="ejemplo" aria-labelledby="ejemplo-title">
+    <div class="block-head">
+      <h2 id="ejemplo-title">Mira el ejemplo</h2>
+      <p>Una o dos frases que dicen qué pulsar y qué mirar.</p>
+    </div>
+    <div class="controls">
+      <button type="button" class="btn btn-primary" id="demo-play">Repetir el ejemplo</button>
+      <button type="button" class="btn" id="sound" aria-pressed="true">Sonido activado</button>
+    </div>
+    <div class="code-row" id="demo-chips" aria-label="Pasos del ejemplo"></div>
+    <div class="kb-wrap" id="demo-kb"></div>
+    <p class="caption" id="demo-caption"></p>
+  </section>
+
+  <!-- SLOT practice ("Tu turno"). The student DOES the thing. Show no answer before they try:
+       feedback only after an attempt, a hint button for when they are stuck, and a result card
+       (hidden until they finish) that reveals what they built. -->
+  <section class="block" id="turno" aria-labelledby="turno-title">
+    <div class="block-head">
+      <h2 id="turno-title">Tu turno</h2>
+      <p>La tarea concreta, en una o dos frases.</p>
+    </div>
+    <p class="status" id="pr-status" aria-live="polite"></p>
+    <div class="code-row" id="pr-chips" aria-label="Pasos de la práctica"></div>
+    <div class="kb-wrap" id="pr-kb"></div>
+    <div class="actions">
+      <button type="button" class="btn" id="pr-hint">Pista</button>
+      <button type="button" class="btn" id="pr-reset">Empezar de nuevo</button>
+    </div>
+    <div class="result" id="pr-result" hidden>
+      <div class="result-head">
+        <h3>Título del resultado</h3>
+        <span class="badge" style="background: var(--w8)">8B</span>
+      </div>
+      <p class="fine">Lo que el estudiante acaba de construir, con los nombres en español e inglés.</p>
+    </div>
+  </section>
+
+  <!-- SLOT wheel ("Por qué importa en la rueda"). The Camelot bridge. Label anything specific to
+       Camelot or Mixed In Key as the wheel's convention, not as music theory. -->
+  <section class="block wheel-block" id="rueda" aria-labelledby="rueda-title">
+    <div class="wheel-text">
+      <h2 id="rueda-title">Por qué importa en la rueda</h2>
+      <p>Cómo esta idea se convierte en una decisión al mezclar.</p>
+      <p class="fine">Un adelanto de una línea de la próxima lección, sin destripar nada más.</p>
+    </div>
+    <figure class="wheel-fig">
+      <svg id="wheel" viewBox="0 0 260 260" role="img" aria-label="Casillas de la rueda de Camelot"></svg>
+      <figcaption class="wheel-count" id="wheel-count"></figcaption>
+    </figure>
+  </section>
+
+  <!-- Exam: fixed markup, filled by tutor-core from LESSON and EXAM below. Do not change the ids. -->
+  <section class="block" id="examen" aria-labelledby="examen-title">
+    <div class="block-head">
+      <h2 id="examen-title">Examen</h2>
+      <p>Cinco preguntas para comprobar que entiendes la idea, no que la recuerdas de memoria. Elige una respuesta en cada una y pulsa Corregir examen.</p>
+    </div>
+    <div id="exam-root"></div>
+  </section>
+
+  <!-- SLOT footer: cite the source module(s) of the notes. -->
+  <p class="foot">Basado en los apuntes del módulo XX (Tema).</p>
+</main>
+
+<script>
+/* === tutor-core v1 === */
+/* Memory bridge + exam engine. Copy this block verbatim into every lesson.
+   The lesson declares `const LESSON = {id, title}` and `const EXAM = [...]`, then calls
+   TutorExam.mount(rootElement, LESSON, EXAM). */
+var TutorMemory = (function () {
+  "use strict";
+
+  var STORE_KEY = "tutor-camelot-exams";
+  var STORE_CAP = 200;
+  var PROBE_MS = 1500;
+  var SAVE_MS = 5000;
+  var mode = "browser";
+  var initPromise = null;
+
+  // Storage can be blocked (private windows, sandboxed frames), so every access is guarded.
+  function readStore() {
+    try {
+      var arr = JSON.parse(localStorage.getItem(STORE_KEY) || "[]");
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+  function writeStore(arr) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(arr.slice(-STORE_CAP))); return true; }
+    catch (e) { return false; }
+  }
+
+  // fetch with a hard deadline: a hung server must never freeze the lesson.
+  function request(url, options, ms) {
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, ms);
+    options.signal = ctrl.signal;
+    return fetch(url, options).then(
+      function (res) { clearTimeout(timer); return res; },
+      function (err) { clearTimeout(timer); throw err; }
+    );
+  }
+
+  function ofLesson(list, id) {
+    return list.filter(function (r) { return r && r.lesson_id === id; });
+  }
+  function bestOf(list) {
+    var best = null;
+    list.forEach(function (r) {
+      if (r.total > 0 && (!best || r.score / r.total > best.score / best.total)) best = r;
+    });
+    return best ? best.score + "/" + best.total : null;
+  }
+
+  // Resolves to "local" when the tutor server answers with the course file, else "browser".
+  // Anything odd (artifact origin, file://, HTML 404, timeout) falls back to the browser.
+  function init() {
+    if (initPromise) return initPromise;
+    initPromise = new Promise(function (resolve) {
+      function finish(next) { mode = next; resolve(next); }
+      try {
+        request("/api/progress", { cache: "no-store" }, PROBE_MS).then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.json();
+        }).then(function (data) {
+          var ok = data && typeof data === "object" && !Array.isArray(data) &&
+            Object.prototype.hasOwnProperty.call(data, "course");
+          finish(ok ? "local" : "browser");
+        }).catch(function () { finish("browser"); });
+      } catch (e) { finish("browser"); }
+    });
+    return initPromise;
+  }
+
+  function saveBrowser(result, fellBack, reason) {
+    var record = {
+      lesson_id: result.lesson_id,
+      title: result.title,
+      date: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+      score: result.score,
+      total: result.total,
+      answers: result.answers
+    };
+    var all = readStore();
+    all.push(record);
+    var stored = writeStore(all);
+    var mine = ofLesson(all, result.lesson_id);
+    return {
+      where: "browser", stored: stored, fellBack: fellBack, reason: reason || null, record: record,
+      attempts: stored ? mine.length : null, best: stored ? bestOf(mine) : null
+    };
+  }
+
+  // Local mode POSTs to the tutor server. If that fails the result is kept in the browser instead
+  // and the mode drops to "browser" until the page is reloaded, so the UI never claims a save
+  // that did not happen.
+  function saveExam(result) {
+    return init().then(function () {
+      if (mode !== "local") return saveBrowser(result, false);
+      return request("/api/exam", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result)
+      }, SAVE_MS).then(function (res) {
+        return res.json().then(function (body) {
+          if (!res.ok || !body || body.ok !== true) {
+            throw new Error((body && body.error) || ("HTTP " + res.status));
+          }
+          return { where: "local", stored: true, fellBack: false, reason: null, attempts: body.attempts, best: body.best };
+        });
+      }).catch(function (err) {
+        mode = "browser";
+        return saveBrowser(result, true, err && err.message ? err.message : "error");
+      });
+    });
+  }
+
+  // Attempts for one lesson from the active source, newest first. Both sources append
+  // chronologically, so reversing is enough and survives equal timestamps.
+  function history(lessonId) {
+    return init().then(function () {
+      if (mode === "local") {
+        return request("/api/progress", { cache: "no-store" }, PROBE_MS).then(function (res) {
+          return res.json();
+        }).then(function (data) {
+          return ofLesson(Array.isArray(data.exams) ? data.exams : [], lessonId).reverse();
+        }).catch(function () {
+          return ofLesson(readStore(), lessonId).reverse();
+        });
+      }
+      return ofLesson(readStore(), lessonId).reverse();
+    });
+  }
+
+  return { init: init, saveExam: saveExam, history: history, getMode: function () { return mode; } };
+})();
+
+var TutorExam = (function () {
+  "use strict";
+
+  function h(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function listEs(nums) {
+    if (nums.length === 1) return String(nums[0]);
+    return nums.slice(0, -1).join(", ") + " y " + nums[nums.length - 1];
+  }
+
+  function fmtDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return String(iso);
+    try { return d.toLocaleString("es", { dateStyle: "medium", timeStyle: "short" }); }
+    catch (e) { return d.toISOString().slice(0, 16).replace("T", " "); }
+  }
+
+  // Fail loudly at authoring time: a malformed exam is a lesson bug, not something to hide.
+  function validate(lesson, exam) {
+    if (!lesson || !/^\d{2}$/.test(String(lesson.id)) || !lesson.title) {
+      throw new Error("tutor-core: LESSON needs a two-digit string id and a title.");
+    }
+    if (!Array.isArray(exam) || exam.length < 1 || exam.length > 50) {
+      throw new Error("tutor-core: EXAM must be a list of 1 to 50 questions.");
+    }
+    var seen = {};
+    exam.forEach(function (q, i) {
+      var where = "EXAM[" + i + "]";
+      if (!q || !/^[A-Za-z][\w-]*$/.test(q.id || "") || seen[q.id]) throw new Error("tutor-core: " + where + " needs a unique id such as q1.");
+      seen[q.id] = true;
+      if (!q.q || !q.why) throw new Error("tutor-core: " + where + " needs q and why.");
+      if (!Array.isArray(q.options) || q.options.length < 2 || q.options.length > 6) throw new Error("tutor-core: " + where + " needs 2 to 6 options.");
+      if (typeof q.answer !== "number" || q.answer % 1 !== 0 || q.answer < 0 || q.answer >= q.options.length) throw new Error("tutor-core: " + where + ".answer must be a valid option index.");
+    });
+    if (exam.length !== 5 && window.console) console.warn("tutor-core: the course convention is 5 questions per exam.");
+  }
+
+  function mount(root, lesson, exam) {
+    validate(lesson, exam);
+    var state = { graded: false, last: null };
+    var total = exam.length;
+    root.textContent = "";
+    root.classList.add("exam-root");
+
+    var form = h("form", "exam");
+    form.id = "exam-form";
+    form.noValidate = true;
+
+    var fieldsets = exam.map(function (q, qi) {
+      var fs = h("fieldset", "exam-q");
+      fs.id = q.id + "-fs";
+      var legend = h("legend");
+      legend.appendChild(h("span", "exam-num", "Pregunta " + (qi + 1) + " de " + total));
+      legend.appendChild(h("span", "exam-text", q.q));
+      fs.appendChild(legend);
+      var opts = h("div", "exam-opts");
+      q.options.forEach(function (text, oi) {
+        var label = h("label", "exam-opt");
+        var input = h("input");
+        input.type = "radio";
+        input.name = q.id;
+        input.id = q.id + "-o" + oi;
+        input.value = String(oi);
+        label.htmlFor = input.id;
+        label.appendChild(input);
+        label.appendChild(h("span", "exam-opt-text", text));
+        opts.appendChild(label);
+      });
+      fs.appendChild(opts);
+      var fb = h("div", "exam-fb");
+      fb.id = q.id + "-fb";
+      fb.hidden = true;
+      fs.appendChild(fb);
+      form.appendChild(fs);
+      return fs;
+    });
+
+    var actions = h("div", "actions");
+    var submit = h("button", "btn btn-primary", "Corregir examen");
+    submit.type = "submit";
+    submit.id = "exam-submit";
+    var retry = h("button", "btn", "Repetir examen");
+    retry.type = "button";
+    retry.id = "exam-retry";
+    retry.hidden = true;
+    var progress = h("span", "fine");
+    progress.id = "exam-progress";
+    actions.appendChild(submit);
+    actions.appendChild(retry);
+    actions.appendChild(progress);
+    form.appendChild(actions);
+
+    var status = h("p", "status");
+    status.id = "exam-status";
+    status.setAttribute("role", "status");
+    form.appendChild(status);
+
+    var resultBox = h("div", "result exam-result");
+    resultBox.id = "exam-result";
+    resultBox.tabIndex = -1;
+    resultBox.hidden = true;
+    var resultHead = h("div", "result-head");
+    var score = h("h3");
+    score.id = "exam-score";
+    resultHead.appendChild(score);
+    var resultMsg = h("p");
+    resultMsg.id = "exam-msg";
+    var saveNote = h("p", "fine");
+    saveNote.id = "exam-save";
+    saveNote.setAttribute("role", "status");
+    resultBox.appendChild(resultHead);
+    resultBox.appendChild(resultMsg);
+    resultBox.appendChild(saveNote);
+
+    var histBox = h("div", "exam-hist");
+    histBox.id = "exam-hist";
+    histBox.hidden = true;
+    histBox.appendChild(h("h3", "", "Intentos anteriores"));
+    var histList = h("ol");
+    histBox.appendChild(histList);
+
+    var modeLine = h("p", "exam-mode", "Memoria: comprobando…");
+    modeLine.id = "exam-mode";
+    var copyBox = h("div", "exam-copy");
+    copyBox.id = "exam-copy";
+    copyBox.hidden = true;
+    var copyBtn = h("button", "btn", "Copiar resultado");
+    copyBtn.type = "button";
+    copyBtn.id = "exam-copy-btn";
+    var copyNote = h("p", "fine", "Para guardarlo en tu registro, abre la lección desde el servidor local o pega el resultado en el chat.");
+    copyNote.id = "exam-copy-note";
+    var copyMsg = h("p", "fine");
+    copyMsg.id = "exam-copy-msg";
+    copyMsg.setAttribute("role", "status");
+    var jsonBox = h("textarea", "exam-json");
+    jsonBox.id = "exam-json";
+    jsonBox.readOnly = true;
+    jsonBox.rows = 8;
+    jsonBox.hidden = true;
+    jsonBox.setAttribute("aria-label", "Resultado en formato JSON");
+    copyBox.appendChild(copyBtn);
+    copyBox.appendChild(copyNote);
+    copyBox.appendChild(copyMsg);
+    copyBox.appendChild(jsonBox);
+
+    root.appendChild(form);
+    root.appendChild(resultBox);
+    root.appendChild(histBox);
+    root.appendChild(modeLine);
+    root.appendChild(copyBox);
+
+    function chosenOf(q) {
+      var picked = form.querySelector('input[name="' + q.id + '"]:checked');
+      return picked ? Number(picked.value) : -1;
+    }
+    function updateProgress() {
+      var n = exam.filter(function (q) { return chosenOf(q) >= 0; }).length;
+      progress.textContent = state.graded ? "" : n + " de " + total + " respondidas";
+    }
+
+    function renderMode() {
+      var local = TutorMemory.getMode() === "local";
+      modeLine.textContent = local ? "Memoria: archivo local (progreso.json)" : "Memoria: este navegador";
+      copyBox.hidden = local || !state.last;
+    }
+
+    function renderHistory(list, justSaved) {
+      histList.textContent = "";
+      list.slice(0, 5).forEach(function (r, i) {
+        var li = h("li");
+        li.appendChild(h("span", "", fmtDate(r.date) + (justSaved && i === 0 ? " · este intento" : "")));
+        li.appendChild(h("b", "", r.score + " de " + r.total));
+        histList.appendChild(li);
+      });
+      histBox.hidden = list.length === 0;
+    }
+
+    function refreshHistory(justSaved) {
+      return TutorMemory.history(lesson.id).then(function (list) {
+        if (!state.last && TutorMemory.getMode() === "browser" && list.length) state.last = list[0];
+        renderHistory(list, justSaved);
+        renderMode();
+      });
+    }
+
+    function saveMessage(saved) {
+      if (saved.where === "local") return "Resultado guardado en progreso.json.";
+      if (saved.fellBack) {
+        return saved.stored
+          ? "No se pudo escribir en progreso.json (" + saved.reason + "). El resultado se guardó en este navegador."
+          : "No se pudo escribir en progreso.json (" + saved.reason + ") ni en este navegador. Usa Copiar resultado.";
+      }
+      return saved.stored
+        ? "Resultado guardado en este navegador."
+        : "Este navegador bloquea el almacenamiento, así que el resultado no se guardó. Usa Copiar resultado.";
+    }
+
+    function grade() {
+      var answers = exam.map(function (q) {
+        var c = chosenOf(q);
+        return { id: q.id, chosen: c, correct: q.answer, ok: c === q.answer };
+      });
+      var right = answers.filter(function (a) { return a.ok; }).length;
+      state.graded = true;
+
+      exam.forEach(function (q, qi) {
+        var a = answers[qi];
+        var fs = fieldsets[qi];
+        var fb = fs.querySelector(".exam-fb");
+        fs.classList.add(a.ok ? "is-ok" : "is-bad");
+        Array.prototype.forEach.call(fs.querySelectorAll(".exam-opt"), function (label, oi) {
+          label.querySelector("input").disabled = true;
+          if (oi === q.answer) label.classList.add("is-correct");
+          else if (oi === a.chosen) label.classList.add("is-wrong");
+        });
+        fb.textContent = "";
+        fb.className = "exam-fb " + (a.ok ? "is-ok" : "is-bad");
+        if (a.ok) {
+          fb.appendChild(h("strong", "", "✓ Correcta."));
+        } else {
+          fb.appendChild(h("strong", "", "✗ No es esa."));
+          fb.appendChild(h("span", "", "La respuesta correcta es: " + q.options[q.answer]));
+          fb.appendChild(h("span", "", q.why));
+        }
+        fb.hidden = false;
+        fs.setAttribute("aria-describedby", fb.id);
+      });
+
+      score.textContent = right + " de " + total;
+      resultMsg.textContent = right === total
+        ? "Perfecto: lo tienes claro."
+        : right / total >= 0.6
+          ? "Buen resultado. Lee la explicación de las preguntas marcadas con ✗ y vuelve a intentarlo."
+          : "Aún no está firme. Vuelve a Mira y a Tu turno, y repite el examen cuando quieras.";
+      saveNote.textContent = "Guardando el resultado…";
+      resultBox.hidden = false;
+      submit.hidden = true;
+      retry.hidden = false;
+      status.textContent = "";
+      status.classList.remove("is-warn");
+      updateProgress();
+      resultBox.focus();
+
+      TutorMemory.saveExam({ lesson_id: lesson.id, title: lesson.title, score: right, total: total, answers: answers })
+        .then(function (saved) {
+          if (saved.where === "browser" && saved.record) state.last = saved.record;
+          saveNote.textContent = saveMessage(saved);
+          return refreshHistory(saved.stored);
+        })
+        .catch(function () { saveNote.textContent = "No se pudo guardar el resultado. Usa Copiar resultado si necesitas conservarlo."; });
+    }
+
+    form.addEventListener("change", function () {
+      if (state.graded) return;
+      status.textContent = "";
+      status.classList.remove("is-warn");
+      updateProgress();
+    });
+
+    form.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      if (state.graded) return;
+      var missing = [];
+      exam.forEach(function (q, qi) { if (chosenOf(q) < 0) missing.push(qi + 1); });
+      if (missing.length) {
+        status.textContent = (missing.length === 1 ? "Te falta responder la pregunta " : "Te faltan las preguntas ") + listEs(missing) + ".";
+        status.classList.add("is-warn");
+        fieldsets[missing[0] - 1].querySelector("input").focus();
+        return;
+      }
+      grade();
+    });
+
+    retry.addEventListener("click", function () {
+      form.reset();
+      state.graded = false;
+      fieldsets.forEach(function (fs) {
+        fs.classList.remove("is-ok", "is-bad");
+        fs.removeAttribute("aria-describedby");
+        var fb = fs.querySelector(".exam-fb");
+        fb.hidden = true;
+        fb.className = "exam-fb";
+        fb.textContent = "";
+        Array.prototype.forEach.call(fs.querySelectorAll(".exam-opt"), function (label) {
+          label.classList.remove("is-correct", "is-wrong");
+          label.querySelector("input").disabled = false;
+        });
+      });
+      resultBox.hidden = true;
+      submit.hidden = false;
+      retry.hidden = true;
+      status.textContent = "";
+      updateProgress();
+      fieldsets[0].querySelector("input").focus();
+    });
+
+    copyBtn.addEventListener("click", function () {
+      if (!state.last) return;
+      var text = JSON.stringify(state.last, null, 2);
+      function showText() {
+        jsonBox.hidden = false;
+        jsonBox.value = text;
+        jsonBox.focus();
+        jsonBox.select();
+        copyMsg.textContent = "No se pudo copiar automáticamente. El texto está seleccionado: cópialo con Ctrl+C (Cmd+C en Mac).";
+      }
+      try {
+        navigator.clipboard.writeText(text).then(function () {
+          jsonBox.hidden = true;
+          copyMsg.textContent = "Resultado copiado.";
+        }, showText);
+      } catch (e) { showText(); }
+    });
+
+    updateProgress();
+    TutorMemory.init().then(function () { return refreshHistory(false); });
+  }
+
+  return { mount: mount };
+})();
+/* === end tutor-core === */
+</script>
+
+<script>
+/* SLOT lesson config. id: two-digit string, identical to the id in progreso.json.
+   title: the same words as <title>. */
+const LESSON = { id: "00", title: "Nombre de la lección" };
+
+/* SLOT exam. Five questions, 3 or 4 options each, one correct. `answer` is the zero-based index
+   of the correct option; vary its position from question to question. `why` explains the idea
+   from a different angle than the lesson (an analogy or a new example), shown only when the
+   student gets the question wrong. Strings are plain text: no HTML. */
+const EXAM = [
+  { id: "q1", q: "Pregunta de ejemplo 1", options: ["Opción A", "Opción B", "Opción C"], answer: 1, why: "Explicación desde otro ángulo 1." },
+  { id: "q2", q: "Pregunta de ejemplo 2", options: ["Opción A", "Opción B", "Opción C"], answer: 0, why: "Explicación desde otro ángulo 2." },
+  { id: "q3", q: "Pregunta de ejemplo 3", options: ["Opción A", "Opción B", "Opción C", "Opción D"], answer: 3, why: "Explicación desde otro ángulo 3." },
+  { id: "q4", q: "Pregunta de ejemplo 4", options: ["Opción A", "Opción B", "Opción C"], answer: 2, why: "Explicación desde otro ángulo 4." },
+  { id: "q5", q: "Pregunta de ejemplo 5 (aplicación a Camelot)", options: ["Opción A", "Opción B", "Opción C"], answer: 1, why: "Explicación desde otro ángulo 5." }
+];
+
+(function () {
+  "use strict";
+
+  /* ---- Shared helpers: keep as they are unless the lesson truly needs something else. ---- */
+
+  var LAT = ["Do", "Do♯", "Re", "Re♯", "Mi", "Fa", "Fa♯", "Sol", "Sol♯", "La", "La♯", "Si"];
+  var LAT_FLAT = [null, "Re♭", null, "Mi♭", null, null, "Sol♭", null, "La♭", null, "Si♭", null];
+  var US = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+  var US_FLAT = [null, "D♭", null, "E♭", null, null, "G♭", null, "A♭", null, "B♭", null];
+  var BLACK = [1, 3, 6, 8, 10];
+
+  // Keys are numbered in semitones above Do (C); negative numbers and numbers above 11 are other octaves.
+  function isBlack(n) { return BLACK.indexOf(((n % 12) + 12) % 12) !== -1; }
+  function plural(n) { return n === 1 ? "semitono" : "semitonos"; }
+
+  // Audio is created lazily inside a click handler: browsers refuse to start it before a user gesture.
+  var audioCtx = null;
+  var soundOn = true;
+  function play(n) {
+    if (!soundOn) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      var t = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = 261.6256 * Math.pow(2, n / 12);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.22, t + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 1);
+    } catch (e) { /* audio unavailable: the lesson still works silently */ }
+  }
+  function bindSoundToggle(btn) {
+    btn.addEventListener("click", function () {
+      soundOn = !soundOn;
+      btn.setAttribute("aria-pressed", String(soundOn));
+      btn.textContent = soundOn ? "Sonido activado" : "Sonido desactivado";
+    });
+  }
+
+  // opts.start: number of the first key (default 0 = Do (C)); opts.count: number of keys (default 24).
+  // Start and end on a white key, otherwise a black key hangs off the edge of the case.
+  // onPress receives the key number. Returns the handle that setKeys() and scrollToKey() need.
+  function buildKeyboard(root, onPress, opts) {
+    opts = opts || {};
+    var start = opts.start || 0;
+    var count = opts.count || 24;
+    var whites = 0;
+    for (var n = start; n < start + count; n++) if (!isBlack(n)) whites++;
+    if ((isBlack(start) || isBlack(start + count - 1)) && window.console) {
+      console.warn("buildKeyboard: start and end on a white key so no black key hangs off the edge.");
+    }
+    root.innerHTML = '<div class="kb-inner"><div class="arcs"></div><div class="case"><div class="kb"></div></div></div>';
+    root.querySelector(".kb-inner").style.minWidth = Math.round(whites * 31.5) + "px";
+    var kbEl = root.querySelector(".kb");
+    var arcs = root.querySelector(".arcs");
+    var W = 100 / whites;
+    var BW = W * 0.62;
+    var wpos = 0;
+    var keys = [];
+    var centers = [];
+    for (var i = 0; i < count; i++) {
+      var num = start + i;
+      var pc = ((num % 12) + 12) % 12;
+      var black = isBlack(num);
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "key " + (black ? "black" : "white");
+      if (black) {
+        btn.style.left = (wpos * W - BW / 2) + "%";
+        btn.style.width = BW + "%";
+        centers.push(wpos * W);
+        btn.setAttribute("aria-label", LAT[pc] + " o " + LAT_FLAT[pc] + " (" + US[pc] + " / " + US_FLAT[pc] + ")");
+      } else {
+        btn.style.left = (wpos * W) + "%";
+        btn.style.width = W + "%";
+        centers.push((wpos + 0.5) * W);
+        btn.setAttribute("aria-label", LAT[pc] + " (" + US[pc] + ")");
+        wpos++;
+      }
+      btn.dataset.lat = LAT[pc];
+      btn.dataset.us = US[pc];
+      btn.innerHTML = '<span class="k-lat"></span><span class="k-us"></span>';
+      btn.querySelector(".k-lat").textContent = LAT[pc];
+      btn.querySelector(".k-us").textContent = US[pc];
+      (function (value) { btn.addEventListener("click", function () { onPress(value); }); })(num);
+      kbEl.appendChild(btn);
+      keys.push(btn);
+    }
+    return { wrap: root, keys: keys, centers: centers, arcs: arcs, start: start };
+  }
+
+  // lit: key numbers in the order they are played; the first one is marked as the start.
+  // opts.spell(pos) -> {lat, us} renames the lit key at that position (black keys need the
+  // name the scale uses). opts.arcs: one label per hop between consecutive lit keys.
+  function setKeys(kb, lit, opts) {
+    opts = opts || {};
+    kb.keys.forEach(function (btn, i) {
+      var pos = lit.indexOf(kb.start + i);
+      btn.classList.toggle("is-lit", pos >= 0);
+      btn.classList.toggle("is-start", pos === 0);
+      var s = pos >= 0 && opts.spell ? opts.spell(pos) : { lat: btn.dataset.lat, us: btn.dataset.us };
+      btn.querySelector(".k-lat").textContent = s.lat;
+      btn.querySelector(".k-us").textContent = s.us;
+    });
+    kb.arcs.innerHTML = "";
+    (opts.arcs || []).forEach(function (label, k) {
+      var a = kb.centers[lit[k] - kb.start];
+      var b = kb.centers[lit[k + 1] - kb.start];
+      var arc = document.createElement("div");
+      arc.className = "arc";
+      arc.style.left = "calc(" + a + "% + 2px)";
+      arc.style.width = "calc(" + (b - a) + "% - 4px)";
+      var span = document.createElement("span");
+      span.textContent = label;
+      arc.appendChild(span);
+      kb.arcs.appendChild(arc);
+    });
+  }
+
+  // On narrow screens the keyboard scrolls sideways inside its own container; bring a key into view.
+  function scrollToKey(kb, num) {
+    var wrap = kb.wrap;
+    if (wrap.scrollWidth <= wrap.clientWidth) return;
+    wrap.scrollLeft = Math.max(0, kb.keys[num - kb.start].offsetLeft - 24);
+  }
+
+  // steps: array of numbers; labels: optional parallel array of small captions (e.g. "T", "sT").
+  function renderChips(el, steps, labels, doneCount, showCurrent) {
+    el.innerHTML = "";
+    steps.forEach(function (value, i) {
+      var chip = document.createElement("span");
+      chip.className = "chip" + (i < doneCount ? " done" : (showCurrent && i === doneCount ? " current" : ""));
+      var b = document.createElement("b");
+      b.textContent = String(value);
+      chip.appendChild(b);
+      if (labels) {
+        var small = document.createElement("small");
+        small.textContent = labels[i];
+        chip.appendChild(small);
+      }
+      el.appendChild(chip);
+    });
+  }
+
+  // Restarts a one-shot CSS animation class (is-wrong, is-hint) even if it is already applied.
+  function flash(btn, cls, ms) {
+    btn.classList.remove(cls);
+    void btn.offsetWidth;
+    btn.classList.add(cls);
+    setTimeout(function () { btn.classList.remove(cls); }, ms);
+  }
+
+  // rings: ["B"], ["A"] or ["B", "A"] (outer ring first). Number n sits at n o'clock, 12 on top,
+  // the same clock position for A and B. opts.lit: {"8B": true} marks slots as discovered.
+  // opts.center: {big, small} text for the middle.
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  function polar(r, deg) {
+    var a = deg * Math.PI / 180;
+    return [130 + r * Math.sin(a), 130 - r * Math.cos(a)];
+  }
+  function drawWheel(svg, opts) {
+    var rings = opts.rings || ["B"];
+    var lit = opts.lit || {};
+    var specs = rings.length === 1
+      ? [{ k: rings[0], r1: 70, r2: 124, rl: 97, size: "13px" }]
+      : [{ k: rings[0], r1: 94, r2: 124, rl: 109, size: "12px" }, { k: rings[1], r1: 62, r2: 92, rl: 77, size: "12px" }];
+    svg.innerHTML = "";
+    specs.forEach(function (sp) {
+      for (var n = 1; n <= 12; n++) {
+        var code = n + sp.k;
+        var c = (n % 12) * 30;
+        var p0 = polar(sp.r2, c - 15), p1 = polar(sp.r2, c + 15), p2 = polar(sp.r1, c + 15), p3 = polar(sp.r1, c - 15);
+        var path = document.createElementNS(SVG_NS, "path");
+        path.setAttribute("d", "M" + p0[0] + " " + p0[1] + " A" + sp.r2 + " " + sp.r2 + " 0 0 1 " + p1[0] + " " + p1[1] +
+          " L" + p2[0] + " " + p2[1] + " A" + sp.r1 + " " + sp.r1 + " 0 0 0 " + p3[0] + " " + p3[1] + "Z");
+        path.setAttribute("class", "seg-path");
+        path.style.fill = lit[code] ? "var(--w" + n + ")" : "var(--slot-off)";
+        svg.appendChild(path);
+        var lp = polar(sp.rl, c);
+        var text = document.createElementNS(SVG_NS, "text");
+        text.setAttribute("x", lp[0]);
+        text.setAttribute("y", lp[1]);
+        text.setAttribute("class", "seg-label");
+        text.style.fontSize = sp.size;
+        text.style.fill = lit[code] ? "var(--wheel-ink)" : "var(--muted)";
+        text.textContent = code;
+        svg.appendChild(text);
+      }
+    });
+    if (opts.center) {
+      var big = document.createElementNS(SVG_NS, "text");
+      big.setAttribute("x", 130); big.setAttribute("y", 126);
+      big.setAttribute("class", "wheel-center-big");
+      big.textContent = opts.center.big;
+      svg.appendChild(big);
+      var small = document.createElementNS(SVG_NS, "text");
+      small.setAttribute("x", 130); small.setAttribute("y", 146);
+      small.setAttribute("class", "wheel-center");
+      small.textContent = opts.center.small;
+      svg.appendChild(small);
+    }
+  }
+
+  /* ---- SLOT lesson logic: replace the sample below with this lesson's demo and practice. ---- */
+
+  var SAMPLE = [0, 2, 4, 5, 7, 9, 11, 12];
+  var SAMPLE_HOPS = [2, 2, 1, 2, 2, 2, 1];
+  var SAMPLE_LBL = ["T", "T", "sT", "T", "T", "T", "sT"];
+  var SAMPLE_NAMES = { lat: ["Do", "Re", "Mi", "Fa", "Sol", "La", "Si"], us: ["C", "D", "E", "F", "G", "A", "B"] };
+  function spellSample(pos) {
+    var i = pos === 7 ? 0 : pos;
+    return { lat: SAMPLE_NAMES.lat[i], us: SAMPLE_NAMES.us[i] };
+  }
+
+  bindSoundToggle(document.getElementById("sound"));
+
+  // Demo: complete at rest, the button replays it.
+  var demoKb = buildKeyboard(document.getElementById("demo-kb"), function (n) { play(n); });
+  var demoChips = document.getElementById("demo-chips");
+  var demoTimers = [];
+  function renderDemo(upTo) {
+    setKeys(demoKb, SAMPLE.slice(0, upTo + 1), { spell: spellSample, arcs: SAMPLE_HOPS.slice(0, upTo).map(String) });
+    renderChips(demoChips, SAMPLE_HOPS, SAMPLE_LBL, upTo, upTo < 7);
+    document.getElementById("demo-caption").textContent = upTo === 7 ? "Texto que explica qué se ve en el ejemplo completo." : "";
+  }
+  function animateDemo() {
+    demoTimers.forEach(clearTimeout);
+    demoTimers = [];
+    renderDemo(0);
+    play(SAMPLE[0]);
+    for (var k = 1; k <= 7; k++) {
+      (function (step) {
+        demoTimers.push(setTimeout(function () { renderDemo(step); play(SAMPLE[step]); }, step * 520));
+      })(k);
+    }
+  }
+  document.getElementById("demo-play").addEventListener("click", animateDemo);
+  renderDemo(7);
+
+  // Practice: the student acts first, and nothing is revealed before they try.
+  var prKb = buildKeyboard(document.getElementById("pr-kb"), onPracticeKey);
+  var prChips = document.getElementById("pr-chips");
+  var prStatus = document.getElementById("pr-status");
+  var prResult = document.getElementById("pr-result");
+  var got = [SAMPLE[0]];
+  function setStatus(text, warn) {
+    prStatus.textContent = text;
+    prStatus.classList.toggle("is-warn", !!warn);
+  }
+  function renderPractice() {
+    setKeys(prKb, got, { spell: spellSample });
+    renderChips(prChips, SAMPLE_HOPS, SAMPLE_LBL, got.length - 1, got.length < 8);
+  }
+  function stepText() {
+    var k = got.length - 1;
+    return "Paso " + (k + 1) + " de 7: sube " + SAMPLE_HOPS[k] + " " + plural(SAMPLE_HOPS[k]) + ".";
+  }
+  function onPracticeKey(n) {
+    play(n);
+    if (got.length === 8) return;
+    var k = got.length - 1;
+    if (n === got[k] + SAMPLE_HOPS[k]) {
+      got.push(n);
+      renderPractice();
+      if (got.length === 8) {
+        setStatus("Completo.", false);
+        prResult.hidden = false;
+      } else {
+        setStatus(stepText(), false);
+      }
+      return;
+    }
+    flash(prKb.keys[n - prKb.start], "is-wrong", 450);
+    setStatus("Esa no es. Cuenta cada tecla, blanca o negra.", true);
+  }
+  document.getElementById("pr-hint").addEventListener("click", function () {
+    if (got.length === 8) return;
+    var k = got.length - 1;
+    flash(prKb.keys[got[k] + SAMPLE_HOPS[k] - prKb.start], "is-hint", 1200);
+    setStatus("Fíjate en la tecla marcada: está a " + SAMPLE_HOPS[k] + " " + plural(SAMPLE_HOPS[k]) + ".", false);
+  });
+  document.getElementById("pr-reset").addEventListener("click", function () {
+    got = [SAMPLE[0]];
+    prResult.hidden = true;
+    renderPractice();
+    setStatus(stepText(), false);
+  });
+  renderPractice();
+  setStatus(stepText(), false);
+
+  drawWheel(document.getElementById("wheel"), { rings: ["B"], lit: { "8B": true }, center: { big: "12 B", small: "escalas mayores" } });
+  document.getElementById("wheel-count").textContent = "1 de 12 casillas B descubiertas";
+})();
+
+TutorExam.mount(document.getElementById("exam-root"), LESSON, EXAM);
+</script>
